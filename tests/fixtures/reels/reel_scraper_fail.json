@@ -1,0 +1,9 @@
+{
+  "url": "https://www.instagram.com/reel/scraper_fail/",
+  "scraped": {
+    "status": "fail",
+    "error": "Failed to scrape Instagram Reel"
+  },
+  "nlp": null,
+  "tmdb": null
+}

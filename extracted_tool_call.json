@@ -1,0 +1,29 @@
+{
+  "step": 11300,
+  "tc": {
+    "name": "multi_replace_file_content",
+    "args": {
+      "Description": "Fix Play button to use most confident deep link",
+      "Instruction": "Calculate primaryWatchLink and apply it to the Play button instead of defaulting to TMDB",
+      "ReplacementChunks": [
+        {
+          "AllowMultiple": false,
+          "EndLine": 100,
+          "ReplacementContent": "  const matchScore = highestRating > 0 ? Math.round(highestRating) : null;\n\n  let primaryWatchLink = movie?.watchmodeUrl || '#';\n  let hasValidLink = !!movie?.watchmodeUrl;\n  \n  if (movie?.watchProviders && movie.watchProviders.length > 0) {\n    // 1. Try to find a provider that has a deep link (Netflix, Hulu, etc)\n    const providerWithDeepLink = movie.watchProviders.find(p => getDeepLink(p.name, movie?.title || ''));\n    \n    if (providerWithDeepLink) {\n      primaryWatchLink = getDeepLink(providerWithDeepLink.name, movie?.title || '') || '#';\n      hasValidLink = true;\n    } else {\n      // 2. Try to find a provider with a non-TMDB link\n      const providerWithDirectLink = movie.watchProviders.find(p => p.link && !p.link.includes('themoviedb.org'));\n      if (providerWithDirectLink && providerWithDirectLink.link) {\n        primaryWatchLink = providerWithDirectLink.link;\n        hasValidLink = true;\n      } else if (!hasValidLink && movie.watchProviders[0].link) {\n        // 3. Fallback to the first provider's link (which might be TMDB)\n        primaryWatchLink = movie.watchProviders[0].link;\n        hasValidLink = true;\n      }\n    }\n  }",
+          "StartLine": 100,
+          "TargetContent": "  const matchScore = highestRating > 0 ? Math.round(highestRating) : null;"
+        },
+        {
+          "AllowMultiple": false,
+          "EndLine": 213,
+          "ReplacementContent": "            {/* Watch Movie Button */}\n            {hasValidLink && (\n              <a\n                href={primaryWatchLink}",
+          "StartLine": 210,
+          "TargetContent": "            {/* Watch Movie Button */}\n            {(movie.watchmodeUrl || (movie.watchProviders && movie.watchProviders.length > 0)) && (\n              <a\n                href={movie.watchmodeUrl || movie.watchProviders?.[0]?.link || '#'}"
+        }
+      ],
+      "TargetFile": "C:\\Users\\SHREYESH REDDY\\.gemini\\antigravity\\scratch\\teamwork_projects\\reelist_elite\\src\\components\\DetailModal.tsx",
+      "toolAction": "Fix Watch Button link",
+      "toolSummary": "Fix Watch Button link"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "movie-seed-1",
+    "userId": "test-user-id-1",
+    "title": "Inception",
+    "posterUrl": "https://image.tmdb.org/t/p/w500/qmDp59hMRjLywccE6wqjD25th5G.jpg",
+    "rating": "8.8",
+    "sourceUrl": "https://www.instagram.com/reel/valid_movie/",
+    "addedAt": "2026-06-27T12:00:00.000Z"
+  },
+  {
+    "id": "movie-seed-2",
+    "userId": "test-user-id-1",
+    "title": "The Matrix",
+    "posterUrl": "https://image.tmdb.org/t/p/w500/lh4a21ch4mbbp5c55n.jpg",
+    "rating": "8.7",
+    "sourceUrl": "https://www.instagram.com/reel/another_movie/",
+    "addedAt": "2026-06-27T12:05:00.000Z"
+  }
+]
