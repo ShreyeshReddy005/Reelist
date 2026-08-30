@@ -3,6 +3,7 @@ import { authMiddleware } from "next-firebase-auth-edge";
 
 export async function middleware(request: NextRequest) {
   let serviceAccount = { projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "reelist-9d75b", clientEmail: "", privateKey: "" };
+  let hasServiceAccount = false;
   if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
     try {
       const parsed = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
@@ -11,9 +12,15 @@ export async function middleware(request: NextRequest) {
         clientEmail: parsed.client_email,
         privateKey: parsed.private_key,
       };
+      hasServiceAccount = true;
     } catch (e) {
       console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY", e);
     }
+  }
+
+  // Graceful degradation: If no service account is provided (like in local dev), bypass server-side auth enforcement
+  if (!hasServiceAccount) {
+    return NextResponse.next();
   }
 
   return authMiddleware(request, {
