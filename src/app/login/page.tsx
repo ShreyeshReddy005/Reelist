@@ -27,7 +27,14 @@ export default function LoginPage() {
   // If already logged in, redirect
   if (user) {
     router.push(getRedirectPath());
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#050505]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 text-amber-500 animate-spin" />
+          <p className="text-white/50 text-sm font-medium">Authenticating securely...</p>
+        </div>
+      </div>
+    );
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
