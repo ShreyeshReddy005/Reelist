@@ -18,6 +18,8 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useToast } from '@/components/Toast';
 import type { Movie } from '@/types/movie';
 import { useWatchlist } from '@/hooks/useWatchlist';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -36,6 +38,14 @@ const MOODS = [
 
 export default function HomePage() {
   const { movies, mounted, addMovies, reloadWatchlist } = useWatchlist();
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
 
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isBugReportOpen, setIsBugReportOpen] = useState(false);
@@ -126,7 +136,8 @@ export default function HomePage() {
     showToast(`Added ${newMovies.length} movie${newMovies.length !== 1 ? 's' : ''}!`, 'success');
   };
 
-  if (!mounted) return <div className="min-h-screen bg-background flex flex-col items-center justify-center"><Loader2 className="h-8 w-8 text-amber-500 animate-spin mb-4" /><span className="text-sm text-slate-500">Loading...</span></div>;
+  if (!mounted || authLoading) return <div className="min-h-screen bg-background flex flex-col items-center justify-center"><Loader2 className="h-8 w-8 text-amber-500 animate-spin mb-4" /><span className="text-sm text-slate-500">Loading...</span></div>;
+  if (!user) return null;
 
   if (splashUrl) return <ExtractionSplash initialUrl={splashUrl} onComplete={() => { setSplashUrl(''); reloadWatchlist(); }} />;
 

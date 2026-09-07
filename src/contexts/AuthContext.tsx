@@ -10,7 +10,6 @@ interface AuthContextType {
   loading: boolean;
   logout: () => Promise<void>;
   loginWithGoogle: () => Promise<void>;
-  createSession: (user: User) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -18,7 +17,6 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   logout: async () => {},
   loginWithGoogle: async () => {},
-  createSession: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -28,27 +26,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const createSession = async (currentUser: User) => {
-    const idToken = await currentUser.getIdToken();
-    await fetch('/api/login', {
-      headers: { Authorization: `Bearer ${idToken}` },
-    });
-  };
-
   useEffect(() => {
-    // Process redirect result
-    getRedirectResult(auth).then(async (result) => {
+    // Process redirect result if any
+    getRedirectResult(auth).then((result) => {
       if (result?.user) {
-        await createSession(result.user);
+        setUser(result.user);
       }
     }).catch(console.error);
 
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      if (currentUser) {
-        // Ensure session cookie exists when auth state changes (e.g. from redirect or reload)
-        await createSession(currentUser);
-      }
       setLoading(false);
     });
 
@@ -57,7 +44,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     await signOut(auth);
-    await fetch('/api/logout');
     setUser(null);
     window.location.href = '/login';
   };
@@ -66,7 +52,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      await createSession(result.user);
       setUser(result.user);
       window.location.href = '/';
     } catch (error: any) {
@@ -79,8 +64,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, logout, loginWithGoogle, createSession }}>
+    <AuthContext.Provider value={{ user, loading, logout, loginWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );
 }
+

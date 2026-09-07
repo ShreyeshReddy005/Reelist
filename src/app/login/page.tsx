@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { user, loginWithGoogle, createSession } = useAuth();
+  const { user, loginWithGoogle } = useAuth();
 
   const getRedirectPath = () => {
     if (typeof window !== 'undefined') {
@@ -43,14 +43,10 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      let userCredential;
       if (isSignUp) {
-        userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await createUserWithEmailAndPassword(auth, email, password);
       } else {
-        userCredential = await signInWithEmailAndPassword(auth, email, password);
-      }
-      if (userCredential.user) {
-        await createSession(userCredential.user);
+        await signInWithEmailAndPassword(auth, email, password);
       }
       window.location.href = getRedirectPath();
     } catch (err: any) {
