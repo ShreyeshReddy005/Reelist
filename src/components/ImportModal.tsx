@@ -164,13 +164,34 @@ export default function ImportModal({
 
       if (response.ok) {
         const data = await response.json();
-        if (navigator.vibrate) navigator.vibrate([10, 30, 10]); // Success double-tap
         
         const moviesToProcess = data.movies && data.movies.length > 0 ? data.movies : (data.movie ? [data.movie] : []);
         
         if (moviesToProcess.length > 0) {
-          const finalMovies: Movie[] = moviesToProcess.map((extractedMovie: Partial<Movie>) => ({
-            id: Date.now().toString() + Math.random().toString(36).slice(2),
+          setStep('fetching');
+          const enrichedMovies = [];
+          for (const rawMovie of moviesToProcess) {
+            try {
+              const enrichRes = await fetch('/api/enrich', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ movie: rawMovie, url: targetUrl.trim() }),
+              });
+              if (enrichRes.ok) {
+                const enriched = await enrichRes.json();
+                enrichedMovies.push(enriched);
+              } else {
+                enrichedMovies.push(rawMovie);
+              }
+            } catch (e) {
+              enrichedMovies.push(rawMovie);
+            }
+          }
+          
+          if (navigator.vibrate) navigator.vibrate([10, 30, 10]); // Success double-tap
+
+          const finalMovies: Movie[] = enrichedMovies.map((extractedMovie: Partial<Movie>) => ({
+            id: extractedMovie.id || Date.now().toString() + Math.random().toString(36).slice(2),
             title: extractedMovie.title || 'Unknown',
             year: extractedMovie.year,
             runtime: extractedMovie.runtime,
@@ -190,10 +211,11 @@ export default function ImportModal({
             addedAt: new Date().toISOString(),
             watched: false,
             queue: (extractedMovie.imdbRating && extractedMovie.imdbRating >= 7) ? 'watchlist' : 'review',
+            moods: extractedMovie.moods,
           }));
           
           onImport(finalMovies);
-          setExtractedMovies(moviesToProcess);
+          setExtractedMovies(finalMovies);
           setStep('done');
           return;
         } else {
